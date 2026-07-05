@@ -1,0 +1,20 @@
+name: Daily Baby Brief
+on:
+  schedule:
+    - cron: "0 * * * *"   # runs hourly; the script only sends at the local delivery hour set in config.json
+  workflow_dispatch:        # lets you trigger a test send from the Actions tab
+jobs:
+  send:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Send this morning's tip
+        run: node scripts/send-tip.mjs
+        env:
+          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
+          PUSHOVER_TOKEN: ${{ secrets.PUSHOVER_TOKEN }}
+          PUSHOVER_USERS: ${{ secrets.PUSHOVER_USERS }}
+          FORCE: ${{ github.event_name == 'workflow_dispatch' && '1' || '' }}
